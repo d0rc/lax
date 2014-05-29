@@ -1,8 +1,6 @@
 defmodule Lax do
-  use Application.Behaviour
+  use Application
 
-  # See http://elixir-lang.org/docs/stable/Application.Behaviour.html
-  # for more information on OTP Applications
   def start(_type, _args) do
     Lax.Supervisor.start_link
   end
@@ -10,7 +8,7 @@ end
 
 defmodule LAXer do
 	defmodule Transformer do
-		def exec({ {:., _, [Kernel, :access]} , _, [subj, [key]]}) do
+		def exec({ {:., _, [Access, :get]}, _, [subj, key]}) do
 			quote do
 				LAXer.getter(unquote(exec(subj)), unquote(exec(key)))
 			end
@@ -28,7 +26,7 @@ defmodule LAXer do
 	end
 
 	defp scan_proplist([], _), do: nil
-	defp scan_proplist([{key, value}|rest], key), do: value
+	defp scan_proplist([{key, value}|_rest], key), do: value
 	defp scan_proplist([_|rest], key), do: scan_proplist(rest, key)
 
 	def getter(subject, key) when not(is_atom(key)) and is_list(subject) do
